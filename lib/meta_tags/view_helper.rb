@@ -135,6 +135,7 @@ module MetaTags
     # @option default [Boolean, String] :noindex (false) add noindex meta tag; when true, 'robots' will be used, otherwise the string will be used;
     # @option default [Boolean, String] :nofollow (false) add nofollow meta tag; when true, 'robots' will be used, otherwise the string will be used;
     # @option default [String] :canonical (nil) add canonical link tag.
+    # @option default [Hash] :og values according to Open Graph Tags http://developers.facebook.com/docs/reference/plugins/like/
     # @return [String] HTML meta tags to render in HEAD section of the
     #   HTML document.
     #
@@ -164,15 +165,18 @@ module MetaTags
       result = []
 
       # title
+      og = {:"og:site_name" => meta_tags[:site]}
+
       if title.blank?
         result << content_tag(:title, meta_tags[:site])
+        og[:"ogtitle"] = meta_tags[:site]
       else
         title = normalize_title(title).unshift(meta_tags[:site])
         title.reverse! if meta_tags[:reverse] === true
         sep = prefix + separator + suffix
         result << content_tag(:title, title.join(sep))
+        og[:"og:title"] = title.join(sep)
       end
-
       # description
       description = normalize_description(meta_tags[:description])
       result << tag(:meta, :name => :description, :content => description) unless description.blank?
@@ -195,6 +199,14 @@ module MetaTags
 
       # canonical
       result << tag(:link, :rel => :canonical, :href => meta_tags[:canonical]) unless meta_tags[:canonical].blank?
+      og[:"og:url"] = meta_tags[:canonical] unless meta_tags[:canonical].blank?
+
+      # facebook
+
+      og.merge(meta_tags[:og]||{}).each do |key,value|
+        result << tag(:meta, :property => key.to_s, :content => value)
+      end
+
 
       result = result.join("\n")
       result.respond_to?(:html_safe) ? result.html_safe : result

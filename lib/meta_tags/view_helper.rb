@@ -22,7 +22,7 @@ module MetaTags
     #
     def set_meta_tags(meta_tags = {})
       @meta_tags ||= {}
-      @meta_tags.merge!(meta_tags || {})
+      @meta_tags.deep_merge!(meta_tags || {})
     end
 
     # Set the page title and return it back.
@@ -145,7 +145,7 @@ module MetaTags
     #   </head>
     #
     def display_meta_tags(default = {})
-      meta_tags = (default || {}).merge(@meta_tags || {})
+      meta_tags = (default || {}).deep_merge(@meta_tags || {})
 
       # Prefix (leading space)
       prefix = meta_tags[:prefix] === false ? '' : (meta_tags[:prefix] || ' ')
